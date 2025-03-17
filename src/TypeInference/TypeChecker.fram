@@ -6,7 +6,7 @@ import open Type
 import open Utils
 import open FramParser/Expr
 import open Env
-import open TypedTree
+import open Lang/Unif
 import List
 import UVar
 
