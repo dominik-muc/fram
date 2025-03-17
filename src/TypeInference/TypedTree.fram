@@ -1,0 +1,22 @@
+{# This file is part of Fram, released under MIT license.
+ # See LICENSE for details.
+ #}
+
+import Type
+import FramParser/Expr
+
+rec
+pub data Expr =
+    | CVar of String
+    | CStr of String
+    | CInteger of Int
+    | CArr of String, TypedExpr
+    | CApp of TypedExpr, TypedExpr
+    | CLet of String, TypedExpr, TypedExpr
+
+pub data rec TypedExpr =
+    { expr : Expr
+    , tp : Type.Scheme
+    }
+
+end

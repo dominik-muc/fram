@@ -2,8 +2,8 @@
  # See LICENSE for details.
  #}
 
-import open TypeChecker
-import open Type
+import open TypeInference/TypeChecker
+import open TypeInference/Type
 import open Utils
 import open Mutable
 import Set
@@ -15,7 +15,7 @@ let test =
     let testCounter = ioMut.ref 0 in
     fn expr =>
         testCounter := testCounter.get + 1;
-        let tp = inferType expr in
+        let (_, tp) = inferType expr in
         printStrLn
             ("#" + testCounter.get.toString + ": " + tp.generalize.toString)
 
