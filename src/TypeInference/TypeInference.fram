@@ -1,0 +1,7 @@
+
+import open Env
+import TypeChecker
+
+let ~env = Env { varMap = StrMap.empty, level = 0 }
+
+pub let tr_prog prog = TypeChecker.inferType prog

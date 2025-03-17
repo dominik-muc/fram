@@ -1,0 +1,3 @@
+
+pub data Val =
+    | VInt32 of Int

@@ -1,0 +1,15 @@
+
+import open Unif
+import open Untyped
+
+let rec tr_expr (expr : TypedExpr) =
+    match expr.expr with
+    | CInteger i => Integer i
+    | CStr s => Str s
+    | CVar x => Var x
+    | CArr x te => Arr x (tr_expr te)
+    | CApp te0 te1 => App (tr_expr te0) (tr_expr te1)
+    | CLet x te0 te1 => Let x (tr_expr te0) (tr_expr te1)
+    end
+
+pub let tr_prog (expr, _) = tr_expr expr

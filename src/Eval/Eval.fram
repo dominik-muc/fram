@@ -1,0 +1,4 @@
+
+import open Value
+
+pub let eval_prog _ = VInt32 42

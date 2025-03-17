@@ -1,0 +1,17 @@
+
+import open FramParser/Expr
+import TypeInference/TypeInference
+import Lang/TypeErase
+import Eval/Eval
+
+pub let (|>) x f = f x
+
+let e1 = Let "id" (Arr "x" (Var "x")) (App (Var "id") (Var "id"))
+
+
+
+pub let common_pipeline prog =
+    prog
+    |> TypeInference.tr_prog
+    |> TypeErase.tr_prog
+    |> Eval.eval_prog
