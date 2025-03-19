@@ -1,15 +1,15 @@
 
-import open Unif
-import open Untyped
+import Unif
+import Untyped
 
-let rec tr_expr (expr : TypedExpr) =
+let rec tr_expr (expr : Unif.TypedExpr) =
     match expr.expr with
-    | CInteger i => Integer i
-    | CStr s => Str s
-    | CVar x => Var x
-    | CArr x te => Arr x (tr_expr te)
-    | CApp te0 te1 => App (tr_expr te0) (tr_expr te1)
-    | CLet x te0 te1 => Let x (tr_expr te0) (tr_expr te1)
-    end
+    | CInteger i => Untyped.Integer i
+    | CStr s => Untyped.Str s
+    | CVar x => Untyped.Var x
+    | CArr x te => Untyped.Arr x (tr_expr te)
+    | CApp te0 te1 => Untyped.App (tr_expr te0) (tr_expr te1)
+    | CLet x te0 te1 => Untyped.Let x (tr_expr te0) (tr_expr te1)
+    end : Untyped.Expr
 
-pub let tr_prog (expr, _) = tr_expr expr
+pub let tr_prog (expr : Unif.TypedExpr) = (tr_expr expr) : Untyped.Expr

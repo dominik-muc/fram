@@ -1,17 +1,18 @@
 
-import open FramParser/Expr
-import TypeInference/TypeInference
+# import open FramParser/Expr
+# import TypeInference/TypeChecker
+# import open TypeInference/Env
 import Lang/TypeErase
-import Eval/Eval
+# import Eval/Eval
 
-pub let (|>) x f = f x
+# pub let (|>) x f = f x
 
-let e1 = Let "id" (Arr "x" (Var "x")) (App (Var "id") (Var "id"))
+# let e1 = Let "id" (Arr "x" (Var "x")) (App (Var "id") (Var "id"))
 
+# let ~env = Env { varMap = StrMap.empty, level = 0 }
 
-
-pub let common_pipeline prog =
-    prog
-    |> TypeInference.tr_prog
-    |> TypeErase.tr_prog
-    |> Eval.eval_prog
+# pub let common_pipeline (prog: Expr) =
+#     prog
+#     |> TypeChecker.inferType
+    # |> TypeErase.tr_prog
+    # |> Eval.eval_prog

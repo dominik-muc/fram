@@ -24,3 +24,9 @@ let _ = test (Let "id" (Arr "x" (Var "x")) (Var "id"))
 let _ = test (Let "id" (Arr "x" (Var "x")) (App (Var "id") (Var "id")))
 let _ = test (Arr "x" (Integer 3))
 let _ = test (Arr "y" (Arr "x" (Integer 3)))
+
+let _ = insert_adt
+    ("List T",
+        [{ id = 0, name = "Nil", args = []}
+        ,{ id = 1, name = "Cons", args = ["T", "List T"]}
+        ])

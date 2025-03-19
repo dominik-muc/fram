@@ -5,7 +5,6 @@
 {# Result of type inference. #}
 
 import TypeInference/Type
-import FramParser/Expr
 
 rec
 pub data Expr =
