@@ -20,3 +20,5 @@ pub let min {T, method lt: T -> T ->[] Bool} (a: T) (b: T) =
     if a < b then a else b
 
 pub let ignore _ = ()
+
+pub let (|>) x f = f x

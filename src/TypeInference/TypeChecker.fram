@@ -62,6 +62,9 @@ rec
             let (tex, ~env) = checkLet x e0 in
             let (te1, t1) = inferType e1 in
             (TypedExpr { expr = CLet x tex te1, tp = t1.toScm}, t1)
+        | EADT adt e =>
+            let ~env = ~env.registerDatatype adt in
+            inferType e
         | _ => runtimeError "not implemented"
         end
 

@@ -2,22 +2,16 @@
  # See LICENSE for details.
  #}
 
-import open TypeInference/TypeChecker
-import open TypeInference/Type
 import open Utils
 import open Mutable
-import Set
-import Map
-
-let ~env = Env { varMap = StrMap.empty, level = 0 }
+import Pipeline
+import open FramParser/Expr
 
 let test =
     let testCounter = ioMut.ref 0 in
     fn expr =>
         testCounter := testCounter.get + 1;
-        let (_, tp) = inferType expr in
-        printStrLn
-            ("#" + testCounter.get.toString + ": " + tp.generalize.toString)
+        Pipeline.typePipeline expr
 
 let _ = test (Let "x" (Integer 2) (Var "x"))
 let _ = test (Let "id" (Arr "x" (Var "x")) (Var "id"))
@@ -25,8 +19,31 @@ let _ = test (Let "id" (Arr "x" (Var "x")) (App (Var "id") (Var "id")))
 let _ = test (Arr "x" (Integer 3))
 let _ = test (Arr "y" (Arr "x" (Integer 3)))
 
-let _ = insert_adt
-    ("List T",
-        [{ id = 0, name = "Nil", args = []}
-        ,{ id = 1, name = "Cons", args = ["T", "List T"]}
-        ])
+{# Everything eventually evolves to javascript... #}
+let list = ADT {
+    name = "List",
+    params = [Var "T"],
+    constructors = [
+        ADTCons {
+            id = 0,
+            name = "Nil",
+            args = []
+        },
+        ADTCons {
+            id = 1,
+            name = "Cons",
+            args = [
+                Var "T",
+                App (Var "List") (Var "T")
+            ]
+        }
+    ]
+}
+
+let _ = test (EADT list (App (Var "Cons") (Integer 4)))
+
+# let _ = insert_adt
+#     ("List T",
+#         [{ id = 0, name = "Nil", args = []}
+#         ,{ id = 1, name = "Cons", args = ["T", "List T"]}
+#         ])

@@ -12,4 +12,4 @@ let rec tr_expr (expr : Unif.TypedExpr) =
     | CLet x te0 te1 => Untyped.Let x (tr_expr te0) (tr_expr te1)
     end : Untyped.Expr
 
-pub let tr_prog (expr : Unif.TypedExpr) = (tr_expr expr) : Untyped.Expr
+pub let tr_prog (expr : Unif.TypedExpr, _) = (tr_expr expr) : Untyped.Expr

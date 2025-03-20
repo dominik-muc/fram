@@ -1,6 +1,0 @@
-
-data rec Ls T =
-    | Nil
-    | Cons of T, Ls T
-
-let x = Cons 42

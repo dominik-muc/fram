@@ -15,7 +15,7 @@ pub data Expr =
     | CApp of TypedExpr, TypedExpr
     | CLet of String, TypedExpr, TypedExpr
 
-pub data rec TypedExpr =
+pub data TypedExpr =
     { expr : Expr
     , tp : Type.Scheme
     }

@@ -1,0 +1,5 @@
+import open FramParser/Expr
+import Pipeline
+
+let e1 = Let "id" (Arr "x" (Var "x")) (App (Var "id") (Var "id"))
+let _ = Pipeline.typePipeline e1

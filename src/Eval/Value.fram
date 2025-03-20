@@ -1,3 +1,9 @@
 
 pub data Val =
     | VInt32 of Int
+
+pub method toString {self: Val} =
+    match self with
+    | VInt32 i => i.toString
+    end
+    
