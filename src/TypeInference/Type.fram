@@ -16,7 +16,6 @@ rec
         | TVar  of TVar.T
         | TArr  of Type, Type
         | TDT   of String, List Type
-        | TNamed   of String
 end
 
 let inject (vt: ViewType) = Type { inner = vt }
@@ -25,7 +24,6 @@ pub let tInt = inject TInt
 pub let tStr = inject TStr
 pub let tStr = inject TStr
 pub let tDT x tpl = inject (TDT x tpl)
-pub let tNamed x = inject (TNamed x)
 pub let tArr t0 t1 = inject (TArr t0 t1)
 
 pub let freshUvar {Env, ~env: Env, method level: Env ->[] Int} () = 
@@ -71,11 +69,14 @@ pub method rec toString {self: Type} =
     | TUVar u    => u.id.toString + "?"
     | TVar t     => "'" + t.id.toString
     | TArr t0 t1 => t0.toString + " -> " + t1.toString
-    | TNamed x => x
-    | TDT x typs => x + typs.foldLeft (fn acc x => x.toString + " " + acc) ""
+    | TDT x typs => x + " " + typs.foldLeft (fn acc x => x.toString + " " + acc) ""
     end
 
-pub method toString {self: Scheme} = self.tp.toString
+pub method toString {self: TVar.Set.T} =
+    self.toList.foldLeft (fn acc t => " " + t.toString + "'" + acc) ""
+
+
+pub method toString {self: Scheme} = "all" + self.tvars.toString + ". " + self.tp.toString
 
 pub method id {self: Type} =
     match self.view with
@@ -115,6 +116,7 @@ pub method rec withSub {self: Type} (sub: List (Pair Int Type)) =
         | None => self
         end
     | TArr t0 t1 => tArr (t0.withSub sub) (t1.withSub sub)
+    | TDT x ts => tDT x (ts.map (fn t => t.withSub sub))
     | _ => self
     end
 

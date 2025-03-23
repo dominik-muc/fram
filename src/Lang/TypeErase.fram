@@ -2,14 +2,25 @@
 import Unif
 import Untyped
 
-let rec tr_expr (expr : Unif.TypedExpr) =
-    match expr.expr with
-    | CInteger i => Untyped.Integer i
-    | CStr s => Untyped.Str s
-    | CVar x => Untyped.Var x
-    | CArr x te => Untyped.Arr x (tr_expr te)
-    | CApp te0 te1 => Untyped.App (tr_expr te0) (tr_expr te1)
-    | CLet x te0 te1 => Untyped.Let x (tr_expr te0) (tr_expr te1)
-    end : Untyped.Expr
+rec
+    let tr_clauses (cls: List Unif.TypedClause) =
+        cls.map (fn cl =>
+            Untyped.Clause {
+                pattern = tr_expr cl.pattern,
+                value = tr_expr cl.value
+            }
+        )
+
+    let tr_expr (expr : Unif.TypedExpr) =
+        match expr.expr with
+        | CInteger i => Untyped.Integer i
+        | CStr s => Untyped.Str s
+        | CVar x => Untyped.Var x
+        | CArr x te => Untyped.Arr x (tr_expr te)
+        | CApp te0 te1 => Untyped.App (tr_expr te0) (tr_expr te1)
+        | CLet x te0 te1 => Untyped.Let x (tr_expr te0) (tr_expr te1)
+        | CMatch te tcls => Untyped.Match (tr_expr te) (tr_clauses tcls)
+        end : Untyped.Expr
+end
 
 pub let tr_prog (expr : Unif.TypedExpr, _) = (tr_expr expr) : Untyped.Expr

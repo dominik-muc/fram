@@ -23,5 +23,11 @@ rec
         | App of Expr, Expr
         | Let of String, Expr, Expr
         | EADT of ADT, Expr
+        | Match of Expr, List Clause
+
+    pub data Clause = {
+        pattern: Expr,
+        value: Expr
+    }
 
 end

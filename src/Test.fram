@@ -11,7 +11,8 @@ let test =
     let testCounter = ioMut.ref 0 in
     fn expr =>
         testCounter := testCounter.get + 1;
-        Pipeline.typePipeline expr
+        let res = Pipeline.typePipeline expr in
+        printStrLn (testCounter.get.toString + "# " + res)
 
 let _ = test (Let "x" (Integer 2) (Var "x"))
 let _ = test (Let "id" (Arr "x" (Var "x")) (Var "id"))
@@ -40,10 +41,126 @@ let list = ADT {
     ]
 }
 
-let _ = test (EADT list (App (Var "Cons") (Integer 4)))
+let either = ADT {
+    name = "Either",
+    params = [Var "L", Var "R"],
+    constructors = [
+        ADTCons {
+            id = 0,
+            name = "Left",
+            args = [Var "L"]
+        },
+        ADTCons {
+            id = 1,
+            name = "Right",
+            args = [Var "R"]
+        }
+    ]
+}
 
-# let _ = insert_adt
-#     ("List T",
-#         [{ id = 0, name = "Nil", args = []}
-#         ,{ id = 1, name = "Cons", args = ["T", "List T"]}
-#         ])
+let bool = ADT {
+    name = "Bool",
+    params = [],
+    constructors = [
+        ADTCons {
+            id = 0,
+            name = "True",
+            args = []
+        },
+        ADTCons {
+            id = 1,
+            name = "False",
+            args = []
+        }
+    ]
+}
+
+{# Or lisp... #}
+let _ = test (EADT list (Var "Nil"))
+let _ = test (EADT list (Var "Cons"))
+let _ = test (EADT list (App (Var "Cons") (Integer 4)))
+let _ = test (EADT list (App (App (Var "Cons") (Integer 4)) (Var "Nil")))
+let _ = test
+    # data List T = Nil | Cons of T, List T
+    (EADT list
+    # let xs = Cons 4 Nil in
+    (Let "xs" (App (App (Var "Cons") (Integer 4)) (Var "Nil"))
+    # match xs with
+    (Match (Var "xs") [
+        # | Cons x xs => x
+        Clause {
+            pattern = (App (App (Var "Cons") (Var "x")) (Var "Nil")),
+            value = (Var "x")
+        },
+        # | Nil => 42
+        Clause {
+            pattern = (Var "Nil"),
+            value = (Integer 42)
+            # the following shouldnt work:
+            # value = (Arr "x" (Integer 13))
+        }
+    ])))
+    # end ;)
+    
+    
+let _ = test
+    (EADT bool
+    (EADT list
+    (Let "pred" ((Var "True"))
+    (Match (Var "pred") [
+        Clause {
+            pattern = (Var "True"),
+            value = (Var "pred")
+        },
+        Clause {
+            pattern = (Var "False"),
+            value = (Var "pred")
+        }
+        # This shouldn't work:
+        # ,Clause {
+        #     pattern = (App (App (Var "Cons") (Var "x")) (Var "Nil")),
+        #     value = (Var "x")
+        # }
+    ]))))
+    # end ;)
+
+let _ = test
+    (EADT either
+    (EADT list
+    (Let "val" (App (Var "Left") (Integer 42))
+    (Match (Var "val") [
+        Clause {
+            pattern = (App (Var "Left") (Var "x")),
+            value = Var "val"
+        },
+        Clause {
+            pattern = (App (Var "Right") (Var "x")),
+            value = Var "val"
+        }
+        # This shoudlnt work:
+        # , Clause {
+        #     pattern = (App (App (Var "Cons") (Var "x")) (Var "Nil")),
+        #     value = (Var "x")
+        # }
+    ]))))
+
+# edge-case
+# let _ = test
+#     (EADT either
+#     (EADT list
+#     (Let "val" (App (Var "Left") (Integer 42))
+#     (Match (Var "val") [
+#         Clause {
+#             pattern = (App (Var "Left") (Var "x")),
+#             value = Var "val"
+#         },
+#         Clause {
+#             pattern = (App (Var "Right") (Var "x")),
+#             value = Var "x"
+#         }
+#         # This shoudlnt work:
+#         # , Clause {
+#         #     pattern = (App (App (Var "Cons") (Var "x")) (Var "Nil")),
+#         #     value = (Var "x")
+#         # }
+#     ]))))

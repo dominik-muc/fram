@@ -14,13 +14,11 @@ pub let commonPipeline (prog: Expr) =
     |> TypeErase.tr_prog
     |> Eval.eval_prog
     |> (fn x => x.toString)
-    |> printStrLn
 
     
 pub let typePipeline (prog: Expr) =
     prog
     |> TypeInference.tr_prog
-    |> (fn (_, tp) => tp.toString)
-    |> printStrLn
+    |> (fn (_, tp) => tp.generalize.toString)
 
 

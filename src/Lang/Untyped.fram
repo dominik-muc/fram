@@ -2,10 +2,18 @@
  # See LICENSE for details.
  #}
 
-pub data rec Expr =
+rec
+pub data Expr =
     | Var of String
     | Str of String
     | Integer of Int
     | Arr of String, Expr
     | App of Expr, Expr
     | Let of String, Expr, Expr
+    | Match of Expr, List Clause
+
+pub data Clause = {
+    pattern: Expr,
+    value: Expr
+}
+end

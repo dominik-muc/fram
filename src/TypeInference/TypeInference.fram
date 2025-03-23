@@ -4,4 +4,6 @@ import TypeChecker
 
 let ~env = Env { varMap = StrMap.empty, level = 0 }
 
-pub let tr_prog = TypeChecker.inferType
+let ~allowUnbound = False
+
+pub let tr_prog expr = handle ~addt with TypeChecker.hAddt in TypeChecker.inferType expr

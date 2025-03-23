@@ -3,6 +3,7 @@
  #}
 
 import open Type
+import open Mutable
 import open Utils
 import open FramParser/Expr
 import open Env
@@ -11,6 +12,10 @@ import List
 import UVar
 
 implicit ~env: Env
+
+data AddT (effect E) = {
+    addT : String -> Scheme ->[E] Unit
+}
 
 let rec unify (t0: Type) (t1: Type) =
     match t0.view, t1.view with
@@ -30,13 +35,24 @@ let rec unify (t0: Type) (t1: Type) =
     | TArr t0 t1, TArr t0' t1' =>
         unify t0 t0';
         unify t1 t1'
+    | TDT x0 ts0, TDT x1 ts1 =>
+        if x0 == x1 then(
+            let ~onError = fn () => runtimeError "Unif failure 6" in
+            List.iter2 unify ts0 ts1)
+        else runtimeError "Unif failure 5"
     | TInt, TInt => ()
     | TStr, TStr => ()
-    | _, _ => runtimeError "Unification failure 4"
+    | _, _ => runtimeError ("Unification failure 4: " + t0.toString + t1.toString)
+    end
+
+pub let hAddt =
+    handler AddT {
+        addT = effect x _ => runtimeError ("Unbound var: " + x)
+    }
     end
 
 rec
-    pub let inferType {~env: Env} expr =
+    pub let inferType {E, ~env: Env, ~addt : AddT E} expr =
         match expr with
         | Integer i => (TypedExpr { expr = CInteger i, tp = tInt.toScm}, tInt)
         | Str     s => (TypedExpr { expr = CStr s, tp = tStr.toScm}, tStr)
@@ -45,7 +61,10 @@ rec
             | Some scm =>
                 let sub = scm.tvars.toList.map (fn id => (id, freshUvar ())) in
                 (TypedExpr { expr = CVar x, tp = scm }, scm.tp.withSub sub) 
-            | None => runtimeError ("Unbound var: " + x)
+            | None =>
+                (let tp = freshUvar () in
+                ~addt.addT x tp.toScm;
+                (TypedExpr { expr = CVar x, tp = tp.toScm }, tp) )
             end
         | Arr v e =>
             let t0 = freshUvar () in
@@ -65,16 +84,45 @@ rec
         | EADT adt e =>
             let ~env = ~env.registerDatatype adt in
             inferType e
+        | Match e cls =>
+            let (tex, te) = inferType e in
+            let retp = freshUvar () in
+            let tcls = List.map (fn (cl: Clause) =>
+                # tym momencie powinno być x : TInt
+                let (~env, tpx) = checkPattern cl.pattern te in
+                let tvx = checkType cl.value retp in
+                # printStrLn retp.toString;
+                # printStrLn te.toString;
+                TypedClause { pattern = tpx, value = tvx }
+            ) cls
+            in
+            (TypedExpr {expr = CMatch tex tcls, tp = retp.toScm}, retp)
         | _ => runtimeError "not implemented"
         end
 
+    let checkPattern {~env : Env} pat tp =
+        let outEnv = ioMut.ref ~env in
+        handle ~addt = AddT {
+            addT = effect x scm / c =>
+                let ~env = outEnv.get in
+                # let ~env = ~env.addLevel in
+                outEnv := ~env.addType x scm;
+                c ()
+        }
+        in
+        let (typed, tp') = inferType pat in
+        unify tp tp';
+        (outEnv.get, typed)
+
     let checkLet {~env : Env} x e =
+        handle ~addt with hAddt in
         let outEnv = ~env in
         let ~env = ~env.addLevel in
         let (tex, tx) = inferType e in
         (tex, outEnv.addType x tx.generalize)
 
     let checkType {~env : Env} expr tp =
-        let (_, tp') = inferType expr in
-        unify tp tp'
+        handle ~addt with hAddt in
+        let (tpx, tp') = inferType expr in
+        unify tp tp'; tpx
 end

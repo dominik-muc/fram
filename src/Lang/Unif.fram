@@ -14,6 +14,12 @@ pub data Expr =
     | CArr of String, TypedExpr
     | CApp of TypedExpr, TypedExpr
     | CLet of String, TypedExpr, TypedExpr
+    | CMatch of TypedExpr, List TypedClause
+
+pub data TypedClause = {
+    pattern: TypedExpr,
+    value: TypedExpr
+}
 
 pub data TypedExpr =
     { expr : Expr
